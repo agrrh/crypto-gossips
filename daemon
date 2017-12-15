@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import time
 import argparse
 import requests
@@ -48,6 +49,9 @@ def message_send(tg_token, tg_chat_id, message):
     return res
 
 if __name__ == '__main__':
+    if not (args.tg_token or args.tg_chat_id):
+        print('Could not proceed without Telegram parameters, use --help flag to see options')
+        sys.exit(0)
     args = args_get()
     pairs = args.pairs.split(',')
 
