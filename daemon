@@ -31,9 +31,9 @@ def message_form(data, pairs):
     message = []
     for pair in pairs:
         if pair in data:
-            row = '`*{}* avg is {}`'.format(pair, data[pair]['avg'].rjust(16, ' '))
+            row = '`{} avg is {}`'.format(pair, data[pair]['avg'].rjust(16, ' '))
         else:
-            row = '`! *{}* no data`'.format(pair)
+            row = '`{} no data`'.format(pair)
         message.append(row)
     return '\n'.join(message)
 
@@ -57,9 +57,11 @@ if __name__ == '__main__':
 
     pairs = args.pairs.split(',')
 
+    print('Starting ...')
     while True:
         data = data_get(api_url)
         message = message_form(data, pairs)
-        message_send(args.tg_token, args.tg_chat_id, message)
+        res = message_send(args.tg_token, args.tg_chat_id, message)
 
+        print('{} {}'.format(time.time(), res))
         time.sleep(args.period)
