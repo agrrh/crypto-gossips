@@ -37,6 +37,8 @@ def holdings_get(url):
     return data
 
 def message_form(data, pairs, holdings):
+    absolute_profit = 0
+
     if holdings:
         message = ['`pair    | average value   | profit`']
     else:
@@ -58,9 +60,16 @@ def message_form(data, pairs, holdings):
 
             if delta_percentage is not None:
                 row = row[:-1] + '  {}{:.2f}%'.format('+' if delta_percentage > 0 else '', delta_percentage) + row[-1:]
+                absolute_profit += currency_total_invested * delta_percentage / 100
         else:
             row = '`{} no data`'.format(pair)
         message.append(row)
+
+    if absolute_profit:
+        message.append('`' + '-' * len(message[0]) + '`')
+        message.append('{}{:.2f} RUB`'.format('+' if absolute_profit > 0 else '', absolute_profit).rjust(len(message[0]), ' '))
+        message[-1] = '`' + message[-1]
+
     return '\n'.join(message)
 
 def message_send(tg_token, tg_chat_id, message):
