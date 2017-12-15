@@ -31,9 +31,9 @@ def message_form(data, pairs):
     message = []
     for pair in pairs:
         if pair in data:
-            row = '*{}* avg is {}'.format(pair, data[pair]['avg'].rjust(16, ' '))
+            row = '`*{}* avg is {}`'.format(pair, data[pair]['avg'].rjust(16, ' '))
         else:
-            row = '*{}* no data'.format(pair)
+            row = '`! *{}* no data`'.format(pair)
         message.append(row)
     return '\n'.join(message)
 
