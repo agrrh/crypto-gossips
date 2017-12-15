@@ -41,6 +41,7 @@ def message_form(data, pairs, holdings):
         message = ['`pair    | average value   | profit`']
     else:
         message = ['`pair    | average value`']
+    message.append('`' + '-' * len(message[0]) + '`')
 
     for pair in pairs:
         if pair in data:
@@ -56,7 +57,7 @@ def message_form(data, pairs, holdings):
                 delta_percentage = round(currency_real_value / currency_total_invested * 100, 2) - 100
 
             if delta_percentage is not None:
-                row = row[:-1] + '  {}{}%'.format('+' if delta_percentage > 0 else '', delta_percentage) + row[-1:]
+                row = row[:-1] + '  {}{:.2f}%'.format('+' if delta_percentage > 0 else '', delta_percentage) + row[-1:]
         else:
             row = '`{} no data`'.format(pair)
         message.append(row)
