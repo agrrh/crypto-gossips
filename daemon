@@ -13,6 +13,8 @@ def args_get():
 
     parser.add_argument('--pairs', type=str, default='BTC_USD', help='Pairs to watch for, ex. "BTC_USD,ETH_RUB"')
 
+    parser.add_argument('--holdings', type=str, default="", help='URL to get deals history')
+
     parser.add_argument('--tg-token', type=str, help='Telegram Bot token')
     parser.add_argument('--tg-chat-id', type=str, help='Telegram chat ID to send notifies to')
 
@@ -27,11 +29,34 @@ def data_get(url):
         data = None
     return data
 
-def message_form(data, pairs):
-    message = []
+def holdings_get(url):
+    if not url:
+        data = {}
+    else:
+        data = requests.get(url).json()
+    return data
+
+def message_form(data, pairs, holdings):
+    if holdings:
+        message = ['`pair    | average value   | profit`']
+    else:
+        message = ['`pair    | average value`']
+
     for pair in pairs:
         if pair in data:
-            row = '`{} avg is {}`'.format(pair, data[pair]['avg'].rjust(16, ' '))
+            row = '`{}  {}`'.format(pair.ljust(8, ' '), data[pair]['avg'].rjust(16, ' '))
+
+            delta_percentage = None
+            if holdings and pair in holdings:
+                currency_total_invested = sum([float(a['price']) * float(a['amount']) for a in holdings[pair]])
+                currency_total_amount = sum([float(a['amount']) for a in holdings[pair]])
+
+                currency_real_value = float(data[pair]['sell_price']) * currency_total_amount
+
+                delta_percentage = round(currency_real_value / currency_total_invested * 100, 2) - 100
+
+            if delta_percentage is not None:
+                row = row[:-1] + '  {}{}%'.format('+' if delta_percentage > 0 else '', delta_percentage) + row[-1:]
         else:
             row = '`{} no data`'.format(pair)
         message.append(row)
@@ -55,12 +80,15 @@ if __name__ == '__main__':
         print('Could not proceed without Telegram parameters, use --help flag to see options')
         sys.exit(0)
 
+    print('Starting ...')
+
     pairs = args.pairs.split(',')
 
-    print('Starting ...')
+    holdings = holdings_get(args.holdings)
+
     while True:
         data = data_get(api_url)
-        message = message_form(data, pairs)
+        message = message_form(data, pairs, holdings)
         res = message_send(args.tg_token, args.tg_chat_id, message)
 
         print('{} {}'.format(time.time(), res))
